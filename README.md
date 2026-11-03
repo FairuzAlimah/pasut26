@@ -1,13 +1,14 @@
 <div align="center">
    
 # Dashboard Analisis, Prediksi, dan Validasi Pasang Surut
-# di Wilayah Selatan Yogyakarta
-
-**Analisis data radar 2026, prediksi pasang surut 2027–2029, serta validasi model GOT4.10 dan EOT20 di wilayah pesisir selatan Yogyakarta.**
-</div>
+**Analisis data radar tahun 2026, prediksi pasang surut periode 2027–2029, serta validasi model GOT4.10 dan EOT20 di wilayah pesisir selatan Daerah Istimewa Yogyakarta.**
 
 ---
-Data pengamatan muka air berasal dari sensor radar pada stasiun pasang surut milik **BMKG**, yaitu **Baron dan Gesing**, yang diakses melalui IOC Sea Level Station Monitoring Facility (UNESCO/IOC, dikelola VLIZ). Prediksi pasang surut berbasis **pyTMD** dengan model **GOT4.10** dan **EOT20** pada 13 titik stasiun di pesisir selatan Daerah Istimewa Yogyakarta, dilengkapi validasi silang antarmodel serta validasi terhadap data pengamatan radar BMKG.
+</div>
+
+<p align="justify">
+Data pengamatan muka air laut diperoleh dari sensor radar pada stasiun pasang surut milik <b>BMKG</b>, yaitu Stasiun Baron dan Gesing, yang diakses melalui <i>IOC Sea Level Station Monitoring Facility</i> (UNESCO/IOC) dan dikelola oleh VLIZ. Prediksi pasang surut dilakukan menggunakan <b>pyTMD</b> dengan model <b>GOT4.10</b> dan <b>EOT20</b> pada 13 titik stasiun di sepanjang pesisir selatan Daerah Istimewa Yogyakarta. Hasil pengolahan dilengkapi dengan analisis perbandingan, validasi silang antarmodel, serta validasi terhadap data pengamatan radar BMKG.
+</p>
 
 ---
 
@@ -22,11 +23,11 @@ Data pengamatan muka air berasal dari sensor radar pada stasiun pasang surut mil
 7. [Persiapan Data dan Model Pasut](#7-persiapan-data-dan-model-pasut)
 8. [Metode Pengolahan](#8-metode-pengolahan)
 9. [Urutan Menjalankan Program](#9-urutan-menjalankan-program)
-10. [Konfigurasi Path dan Data Eksternal](#11-konfigurasi-path-dan-data-eksternal)
-11. [Berkas yang Dihasilkan](#12-berkas-yang-dihasilkan)
-12. [Pemecahan Masalah](#13-pemecahan-masalah)
-13. [Catatan Reproduksibilitas dan Lisensi Data](#14-catatan-reproduksibilitas-dan-lisensi-data)
-14. [Referensi](#15-referensi)
+10. [Konfigurasi Path dan Data Eksternal](#10-konfigurasi-path-dan-data-eksternal)
+11. [Berkas yang Dihasilkan](#11-berkas-yang-dihasilkan)
+12. [Pemecahan Masalah](#12-pemecahan-masalah)
+13. [Catatan Reproduksibilitas dan Lisensi Data](#13-catatan-reproduksibilitas-dan-lisensi-data)
+14. [Referensi](#14-referensi)
 ---
 
 ## 1. Gambaran Umum
