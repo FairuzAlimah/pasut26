@@ -1,0 +1,14 @@
+numpy
+pandas
+scipy
+matplotlib
+pyTMD
+timescale
+utide
+ttide
+openpyxl
+dash
+dash-leaflet
+plotly
+reportlab
+ipython
