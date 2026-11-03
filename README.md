@@ -1,6 +1,12 @@
+<div align="center">
 # Dashboard Analisis, Prediksi, dan Validasi Pasang Surut
+# di Wilayah Selatan Yogyakarta
 
 **Analisis data radar 2026, prediksi pasang surut 2027–2029, serta validasi model GOT4.10 dan EOT20 di wilayah pesisir selatan Yogyakarta.**
+</div>
+
+---
+Data pengamatan muka air berasal dari sensor radar pada stasiun pasang surut milik **BMKG**, yaitu **Baron dan Gesing**, yang diakses melalui IOC Sea Level Station Monitoring Facility (UNESCO/IOC, dikelola VLIZ). Prediksi pasang surut berbasis **pyTMD** dengan model **GOT4.10** dan **EOT20** pada 13 titik stasiun di pesisir selatan Daerah Istimewa Yogyakarta, dilengkapi validasi silang antarmodel serta validasi terhadap data pengamatan radar BMKG.
 
 ---
 
@@ -10,17 +16,16 @@
 2. [Fitur](#2-fitur)
 3. [Teknologi dan Library](#3-teknologi-dan-library)
 4. [Struktur Repository](#4-struktur-repository)
-5. [Persiapan Komputer](#5-persiapan-komputer)
+5. [Persiapan Lingkungan Kerja](#5-persiapan-lingkungan-kerja)
 6. [Instalasi Library](#6-instalasi-library)
 7. [Persiapan Data dan Model Pasut](#7-persiapan-data-dan-model-pasut)
 8. [Metode Pengolahan](#8-metode-pengolahan)
 9. [Urutan Menjalankan Program](#9-urutan-menjalankan-program)
-10. [Menjalankan Dashboard](#10-menjalankan-dashboard)
-11. [Konfigurasi Path dan Data Eksternal](#11-konfigurasi-path-dan-data-eksternal)
-12. [Berkas yang Dihasilkan](#12-berkas-yang-dihasilkan)
-13. [Pemecahan Masalah](#13-pemecahan-masalah)
-14. [Catatan Reproduksibilitas dan Lisensi Data](#14-catatan-reproduksibilitas-dan-lisensi-data)
-15. [Referensi](#15-referensi)
+10. [Konfigurasi Path dan Data Eksternal](#11-konfigurasi-path-dan-data-eksternal)
+11. [Berkas yang Dihasilkan](#12-berkas-yang-dihasilkan)
+12. [Pemecahan Masalah](#13-pemecahan-masalah)
+13. [Catatan Reproduksibilitas dan Lisensi Data](#14-catatan-reproduksibilitas-dan-lisensi-data)
+14. [Referensi](#15-referensi)
 ---
 
 ## 1. Gambaran Umum
@@ -136,7 +141,7 @@ dashboard-pasut-radar-pytmd/
 
 ---
 
-## 5. Persiapan Komputer
+## 5. Persiapan Lingkungan Kerja
 
 ### 5.1 Perangkat lunak
 
@@ -526,30 +531,10 @@ http://127.0.0.1:8050/
 
 ---
 
-## 10. Menjalankan Dashboard
 
-Dashboard berbasis Dash merupakan aplikasi web Python. Untuk menjalankannya:
+## 10. Konfigurasi Path dan Data Eksternal
 
-1. Aktifkan lingkungan Python.
-2. Pindah ke direktori repository.
-3. Pastikan folder hasil pengolahan sudah tersedia.
-4. Jalankan `python dasbor2026.py`.
-5. Buka `http://127.0.0.1:8050/`.
-
-Dashboard berjalan pada komputer yang menjalankan Python. Pengguna lain tidak dapat mengaksesnya hanya dengan membuka repository GitHub.
-
-### Jika ingin dashboard dapat diakses publik
-
-Terdapat dua pendekatan:
-
-- **Hosting aplikasi Python:** deploy aplikasi Dash ke layanan hosting yang mendukung proses Python dan server web. Siapkan kebutuhan penyimpanan hasil, aset, model, dan konfigurasi environment.
-- **Dashboard statis:** buat lapisan tampilan HTML/CSS/JavaScript yang membaca CSV/JSON hasil pengolahan, kemudian publikasikan melalui GitHub Pages. Pendekatan ini memerlukan pengembangan atau konversi dashboard; skrip Dash saat ini tidak otomatis menjadi website GitHub Pages.
-
----
-
-## 11. Konfigurasi Path dan Data Eksternal
-
-Agar proyek dapat dijalankan dari lokasi folder yang berbeda, gunakan path relatif terhadap lokasi file Python. Dengan pendekatan ini, folder proyek dapat disimpan di `Documents`, `Projects`, atau drive lain tanpa menuliskan alamat folder komputer secara permanen di dalam skrip.
+Agar proyek dapat dijalankan dari lokasi folder yang berbeda, gunakan path relatif terhadap lokasi file Python. Dengan pendekatan ini, folder proyek dapat disimpan di `Documents`, `Projects`, atau drive lain tanpa menuliskan alamat folder perangkat secara permanen di dalam skrip.
 
 Contoh penentuan folder dasar:
 
@@ -582,17 +567,17 @@ $env:PASUT_TTIDE_DIR = "lokasi_folder_proyek\HASIL_NAN0"
 python dasbor2026.py
 ```
 
-Ganti `lokasi_folder_proyek` dengan lokasi folder proyek pada komputer yang digunakan. Pengaturan environment variable hanya diperlukan apabila file tidak ditemukan secara otomatis oleh dashboard.
+Ganti `lokasi_folder_proyek` dengan lokasi folder proyek pada perangkat keras yang digunakan. Pengaturan environment variable hanya diperlukan apabila file tidak ditemukan secara otomatis oleh dashboard.
 
 ---
 
-## 12. Berkas yang Dihasilkan
+## 11. Berkas yang Dihasilkan
 
 Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan. Folder tersebut dapat disimpan secara lokal dan tidak harus diunggah seluruhnya ke GitHub. Untuk menjalankan dashboard, pastikan berkas yang dibutuhkan oleh menu dashboard sudah tersedia pada lokasi yang sesuai.
 
 ---
 
-## 13. Pemecahan Masalah
+## 12. Pemecahan Masalah
 
 | Kendala | Penyebab yang mungkin | Solusi |
 |---|---|---|
@@ -606,11 +591,11 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 | Logo tidak tampil | Lokasi aset berbeda dari lokasi pencarian dashboard | Letakkan logo di folder skrip atau sesuaikan fungsi pencarian aset. |
 | PDF gagal dibuat | Library ReportLab atau gambar pendukung bermasalah | Periksa instalasi ReportLab dan lokasi gambar. |
 | Port 8050 digunakan | Ada aplikasi lain yang memakai port tersebut | Tutup aplikasi lain atau ubah port pada bagian `app.run`. |
-| Memori tidak cukup | Proses model dan deret waktu berukuran besar | Tutup aplikasi lain, proses tahun secara bertahap, dan gunakan komputer dengan RAM memadai. |
+| Memori tidak cukup | Proses model dan deret waktu berukuran besar | Tutup aplikasi lain, proses tahun secara bertahap, dan gunakan perangkat keras dengan RAM memadai. |
 
 ---
 
-## 14. Catatan Reproduksibilitas dan Lisensi Data
+## 13. Catatan Reproduksibilitas dan Lisensi Data
 
 - Hasil pengolahan bergantung pada versi library, berkas model, data masukan, konfigurasi parameter, dan koordinat stasiun.
 - Catat versi Python dan library pada setiap rilis agar proses dapat direproduksi.
@@ -622,7 +607,7 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 
 ---
 
-## 15. Referensi
+## 14. Referensi
 
 1. pyTMD — https://github.com/pyTMD/pyTMD
 2. Dokumentasi pyTMD — https://pytmd.readthedocs.io/
@@ -639,5 +624,6 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 
 **Dashboard Analisis, Prediksi, dan Validasi Pasang Surut**  
 Pengolahan data radar 2026 dan prediksi pasang surut 2027–2029.
-
+Pusat Riset Iklim dan Atmosfer, BRIN
+Homebase Yogyakarta, KSTE Achmad Baiquni
 
