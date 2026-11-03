@@ -34,7 +34,7 @@ FILE_RADAR_PATH = OLAH_DIR / "dataPB.xlsx"
 # PENGATURAN
 FILE_RADAR = str(FILE_RADAR_PATH)                                      # data radar 
 DIR_MODEL = str(MODEL_DIR)                                             # folder model pyTMD 
-DIR_OUT = str(HASIL_DIR / "ANALISIS_GABUNGAN_8B_TANPA_DB_SENSITIVITAS")  # folder hasil 
+DIR_OUT = str(HASIL_DIR / "ANALISIS_SENSITIVITAS")  # folder hasil 
 
 TAHUN = 2026
 BULAN = {1: "Januari", 2: "Februari", 3: "Maret", 4: "April", 5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus"}
