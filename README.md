@@ -624,8 +624,8 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 
 ---
 
-**Dashboard Analisis, Prediksi, dan Validasi Pasang Surut**  
-Pengolahan data radar 2026 dan prediksi pasang surut 2027–2029.
-Pusat Riset Iklim dan Atmosfer, BRIN
+
+**Pusat Riset Iklim dan Atmosfer, BRIN**
+
 Homebase Yogyakarta, KSTE Achmad Baiquni
 
