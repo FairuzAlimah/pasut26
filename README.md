@@ -125,7 +125,7 @@ dashboard-pasut-radar-pytmd/
 │   ├── hasil_harmonik_Baron_Jan.xlsx
 │   ├── hasil_harmonik_Panggang_Jan.xlsx
 │   ├── rekap_semua_bulan.xlsx
-│   └── ANALISIS_GABUNGAN_8B_TANPA_DB_SENSITIVITAS/
+│   └── ANALISIS_SENSITIVITAS/
 │       ├── analisis_pasut_gabungan_2026.xlsx
 │       └── grafik/
 │
@@ -556,7 +556,7 @@ Dashboard juga menyediakan environment variable untuk menentukan sumber hasil an
 **Windows Command Prompt:**
 
 ```bat
-set PASUT_RADAR_XLSX=lokasi_folder_proyek\HASIL_NAN0\ANALISIS_GABUNGAN_8B_TANPA_DB_SENSITIVITAS\analisis_pasut_gabungan_2026.xlsx
+set PASUT_RADAR_XLSX=lokasi_folder_proyek\HASIL_NAN0\ANALISIS_SENSITIVITAS\analisis_pasut_gabungan_2026.xlsx
 set PASUT_TTIDE_DIR=lokasi_folder_proyek\HASIL_NAN0
 python dasbor2026.py
 ```
@@ -564,7 +564,7 @@ python dasbor2026.py
 **PowerShell:**
 
 ```powershell
-$env:PASUT_RADAR_XLSX = "lokasi_folder_proyek\HASIL_NAN0\ANALISIS_GABUNGAN_8B_TANPA_DB_SENSITIVITAS\analisis_pasut_gabungan_2026.xlsx"
+$env:PASUT_RADAR_XLSX = "lokasi_folder_proyek\HASIL_NAN0\ANALISIS_SENSITIVITAS\analisis_pasut_gabungan_2026.xlsx"
 $env:PASUT_TTIDE_DIR = "lokasi_folder_proyek\HASIL_NAN0"
 python dasbor2026.py
 ```
