@@ -97,7 +97,6 @@ pasut26/
 │
 ├── README.md
 ├── requirements.txt
-├── .gitignore
 │
 ├── pengolahan.py
 ├── t__tide.py
