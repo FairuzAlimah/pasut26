@@ -97,12 +97,21 @@ pasut26/
 │
 ├── README.md
 ├── requirements.txt
-│
 ├── pengolahan.py
 ├── t__tide.py
 ├── analisisS.py
 ├── dasbor2026.py
 │
+├── assets/
+│   ├── logo_brin.png
+│   ├── logo_dkp_diy.png
+│   │
+│   └── panduan/
+│       ├── nelayan.jpg
+│       ├── pemancing.jpg
+│       ├── wisata.jpg
+│       └── pengelola.jpg
+|
 ├── OLAH/
 │   ├── dataPB.xlsx
 │   ├── hasil_pasut_2027/                 # dibuat saat pengolahan
@@ -112,15 +121,7 @@ pasut26/
 │   ├── hasil_validasi_eot20_2028/        # dibuat saat pengolahan
 │   └── hasil_validasi_eot20_2029/        # dibuat saat pengolahan
 │
-├── logo_brin.png
-├── logo_dkp_diy.png
-├── foto_panduan/
-│   ├── nelayan.jpg
-│   ├── pemancing.jpg
-│   ├── pengelola.jpg
-│   └── wisata.jpg
-│
-├── HASIL_NAN0/                           # dibuat oleh skrip analisis
+├── HASIL_NAN0/                           # dibuat oleh skrip analisisS
 │   ├── hasil_harmonik_Baron_Jan.xlsx
 │   ├── hasil_harmonik_Panggang_Jan.xlsx
 │   ├── rekap_semua_bulan.xlsx
