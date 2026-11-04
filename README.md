@@ -575,7 +575,7 @@ Ganti `lokasi_folder_proyek` dengan lokasi folder proyek pada perangkat keras ya
 
 ## 11. Berkas yang Dihasilkan
 
-Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan. Folder tersebut dapat disimpan secara lokal dan tidak harus diunggah seluruhnya ke GitHub. Untuk menjalankan dashboard, pastikan berkas yang dibutuhkan oleh menu dashboard sudah tersedia pada lokasi yang sesuai.
+Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan. Folder tersebut disimpan secara lokal. Untuk menjalankan dashboard, pastikan berkas yang dibutuhkan oleh menu dashboard sudah tersedia pada lokasi yang sesuai.
 
 ---
 
