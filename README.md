@@ -243,7 +243,7 @@ Skrip `t__tide.py` menggunakan modul `ttide_py` melalui pemanggilan `from ttide.
 
 Pasang T_TIDE dari repository sumber berikut. Pastikan environment Python proyek sudah aktif.
 
-**Cara A — menggunakan Git**
+**Cara A. menggunakan Git**
 
 1. Unduh kode sumber:
 
@@ -257,7 +257,7 @@ Pasang T_TIDE dari repository sumber berikut. Pastikan environment Python proyek
    cd ttide_py
    ```
 
-**Cara B — tanpa Git**
+**Cara B. tanpa Git**
 
 1. Buka [repository ttide_py](https://github.com/moflaher/ttide_py).
 2. Klik tombol **Code**, lalu pilih **Download ZIP**.
@@ -363,7 +363,7 @@ Jalankan `t__tide.py` pada tahap kedua untuk menyiapkan data harmonik radar yang
 
 ## 8. Metode Pengolahan
 
-### 8.1 Prediksi dan validasi silang — `pengolahan.py`
+### 8.1 Prediksi dan validasi silang, `pengolahan.py`
 
 Skrip ini menghasilkan prediksi pasang surut per jam untuk tahun 2027, 2028, dan 2029 menggunakan GOT4.10, serta membandingkannya dengan EOT20.
 
@@ -399,7 +399,7 @@ Tahapan pengolahan:
 
 Validasi GOT4.10–EOT20 merupakan validasi silang antar-model, bukan validasi terhadap pengamatan lapangan. Interpretasi hasil harus mempertimbangkan bahwa kedua model merupakan produk model pasang surut.
 
-### 8.2 Analisis harmonik data radar — `t__tide.py`
+### 8.2 Analisis harmonik data radar, `t__tide.py`
 
 Skrip ini mengolah data radar dari interval pengamatan satu menit menjadi deret waktu per jam, kemudian melakukan analisis harmonik menggunakan T_TIDE.
 
@@ -420,7 +420,7 @@ Pada konfigurasi saat ini, nilai NaN yang masih tersisa pada anomali diubah menj
 
 Parameter elevasi yang dihitung mencakup Z0, S0/MSL, HHWL, MHWL, LLWL, dan MLWL. Rumus dan konstanta penyusunnya mengikuti konfigurasi pada skrip.
 
-### 8.3 Analisis radar terhadap GOT4.10 dan EOT20 — `analisisS.py`
+### 8.3 Analisis radar terhadap GOT4.10 dan EOT20, `analisisS.py`
 
 Skrip ini membandingkan data pengamatan radar dengan hasil model pasang surut GOT4.10 dan EOT20 untuk stasiun Baron dan Panggang selama Januari–Agustus 2026.
 
@@ -470,7 +470,7 @@ Analisis sensitivitas menggunakan tiga skenario ambang:
 
 Aturan kecocokan yang digunakan adalah selisih amplitudo memenuhi batas absolut **atau** batas relatif, serta selisih fase memenuhi batas skenario.
 
-### 8.4 Dashboard — `dasbor2026.py`
+### 8.4 Dashboard, `dasbor2026.py`
 
 Dashboard menggunakan hasil pengolahan yang telah tersimpan sebagai berkas, bukan menjalankan ulang seluruh perhitungan model setiap kali halaman dibuka.
 
@@ -493,7 +493,7 @@ Dashboard dijalankan pada alamat lokal `http://127.0.0.1:8050/`.
 
 Jalankan keempat program secara berurutan. Pastikan data masukan, library, dan model pasang surut yang diperlukan sudah disiapkan.
 
-### Tahap 1 — Prediksi pasang surut dan validasi silang GOT4.10–EOT20
+### Tahap 1. Prediksi pasang surut dan validasi silang GOT4.10–EOT20
 
 ```bash
 python pengolahan.py
@@ -501,7 +501,7 @@ python pengolahan.py
 
 Program menjalankan pengolahan prediksi pasang surut tahun 2027, 2028, dan 2029 pada 13 stasiun. Model GOT4.10 disiapkan melalui pyTMD, sedangkan validasi EOT20 dijalankan apabila data model EOT20 sudah tersedia.
 
-### Tahap 2 — Analisis harmonik data radar menggunakan T_TIDE
+### Tahap 2. Analisis harmonik data radar menggunakan T_TIDE
 
 ```bash
 python t__tide.py
@@ -509,7 +509,7 @@ python t__tide.py
 
 Program membaca data radar dari `OLAH/dataPB.xlsx`. Pastikan T_TIDE Python sudah berhasil dipasang dan dapat diimpor sebelum menjalankan tahap ini.
 
-### Tahap 3 — Analisis radar terhadap GOT4.10 dan EOT20
+### Tahap 3. Analisis radar terhadap GOT4.10 dan EOT20
 
 ```bash
 python analisisS.py
@@ -517,7 +517,7 @@ python analisisS.py
 
 Program menjalankan analisis gabungan data radar dan model, termasuk perbandingan deret waktu, konstanta harmonik, metrik statistik, dan sensitivitas ambang kecocokan.
 
-### Tahap 4 — Menjalankan dashboard
+### Tahap 4. Menjalankan dashboard
 
 ```bash
 python dasbor2026.py
