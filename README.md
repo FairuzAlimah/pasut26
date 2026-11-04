@@ -213,23 +213,25 @@ Gunakan satu lingkungan Python yang sama untuk instalasi library, pengolahan, da
 
 ## 6. Instalasi Library
 
-### 6.1 Perbarui pip
+### 6.1. Perbarui pip
 
-Pastikan environment proyek sudah aktif, kemudian jalankan:
+Pastikan environment Python proyek sudah aktif. Jika menggunakan Anaconda, buka **Anaconda Prompt**. Jika menggunakan Python biasa, gunakan **Command Prompt**, PowerShell, atau terminal yang sesuai.
 
 ```bash
 python -m pip install --upgrade pip
 ```
 
-### 6.2 Instalasi library utama
+### 6.2. Instalasi library utama
 
-Dari folder utama repository, jalankan:
+Pastikan terminal berada di folder utama repository `pasut26`, yaitu folder yang berisi file `requirements.txt`. Jalankan perintah berikut:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Jika instalasi dilakukan satu per satu:
+Perintah tersebut akan memasang library utama beserta versi yang telah ditentukan di dalam `requirements.txt`.
+
+Jika ingin memasang library satu per satu, gunakan perintah berikut:
 
 ```bash
 python -m pip install numpy pandas scipy matplotlib
@@ -237,67 +239,102 @@ python -m pip install pyTMD timescale
 python -m pip install utide openpyxl
 python -m pip install dash dash-leaflet plotly
 python -m pip install reportlab
-```
-
-`IPython` diperlukan hanya apabila ingin menggunakan fasilitas preview tabel di lingkungan interaktif:
-
-```bash
 python -m pip install ipython
 ```
 
-### 6.3 Instalasi T_TIDE Python (`ttide_py`)
+IPython dapat digunakan untuk kebutuhan interaktif atau preview tabel di lingkungan IPython/Jupyter. Jika tidak menggunakan fasilitas tersebut, IPython tidak wajib dipasang untuk menjalankan script Python biasa.
 
-Skrip `t__tide.py` menggunakan modul `ttide_py` melalui pemanggilan `from ttide.t_tide import t_tide`. Panduan pengenalan tersedia pada [artikel Python for Oceanographers](https://ocefpaf.github.io/python4oceanographers/blog/2015/01/19/ttide_py/), sedangkan kode sumbernya tersedia di [repository moflaher/ttide_py](https://github.com/moflaher/ttide_py).
+### 6.3. Instalasi T_TIDE Python (`ttide_py`)
 
-Pasang T_TIDE dari repository sumber berikut. Pastikan environment Python proyek sudah aktif.
+T_TIDE perlu dipasang secara terpisah karena kode sumber yang digunakan proyek diambil dari repository GitHub [moflaher/ttide_py](https://github.com/moflaher/ttide_py).
 
-**Cara A. menggunakan Git**
-
-1. Unduh kode sumber:
-
-   ```bash
-   git clone https://github.com/moflaher/ttide_py.git
-   ```
-
-2. Masuk ke folder hasil unduhan:
-
-   ```bash
-   cd ttide_py
-   ```
-
-**Cara B. tanpa Git**
-
-1. Buka [repository ttide_py](https://github.com/moflaher/ttide_py).
-2. Klik tombol **Code**, lalu pilih **Download ZIP**.
-3. Ekstrak ZIP, kemudian buka terminal pada folder hasil ekstraksi yang berisi file `setup.py`.
-
-Setelah menggunakan salah satu cara di atas, instal paket ke environment Python yang sedang aktif:
-
-   ```bash
-   python -m pip install .
-   ```
-
-   Jika cara tersebut tidak berhasil, repository sumber juga menyediakan instalasi menggunakan `setup.py`:
-
-   ```bash
-   python setup.py install
-   ```
-
-4. Kembali ke folder proyek dashboard, lalu uji apakah modul dapat diimpor:
-
-   ```bash
-   python -c "from ttide.t_tide import t_tide; print('T_TIDE berhasil diimpor')"
-   ```
-
-Pastikan proses instalasi dan pengujian menggunakan interpreter Python yang sama dengan yang digunakan untuk menjalankan skrip. Repository `ttide_py` menyebutkan bahwa proyek ini merupakan konversi T_TIDE yang masih dalam pengembangan dan pengujiannya terbatas. Oleh karena itu, lakukan pengujian pada environment yang digunakan sebelum menjalankan keseluruhan proses.
-
-### 6.5 Memeriksa versi seluruh library
-
-Simpan kode berikut sebagai `cek_library.py` di folder utama repository:
+Skrip `t__tide.py` menggunakan modul T_TIDE melalui pemanggilan:
 
 ```python
-from importlib.metadata import version, PackageNotFoundError
+from ttide.t_tide import t_tide
+```
+
+Terdapat dua cara untuk memasang T_TIDE.
+
+**Cara A. Menggunakan Git**
+
+1. Pastikan Git sudah terinstal dan dapat dijalankan melalui terminal.
+2. Buka Anaconda Prompt, Command Prompt, PowerShell, atau terminal.
+3. Aktifkan environment Python proyek.
+4. Jalankan perintah berikut:
+
+```bash
+git clone https://github.com/moflaher/ttide_py.git
+```
+
+5. Masuk ke folder hasil unduhan:
+
+```bash
+cd ttide_py
+```
+
+6. Pasang T_TIDE ke environment Python yang sedang aktif:
+
+```bash
+python -m pip install .
+```
+
+**Cara B. Tanpa Git**
+
+Jika Git belum tersedia, T_TIDE dapat diunduh secara manual:
+
+1. Buka repository [moflaher/ttide_py](https://github.com/moflaher/ttide_py).
+2. Klik tombol **Code**, kemudian pilih **Download ZIP**.
+3. Ekstrak file ZIP yang telah diunduh.
+4. Buka terminal pada folder hasil ekstraksi yang berisi file `setup.py`.
+5. Pastikan environment Python proyek sudah aktif, kemudian jalankan:
+
+```bash
+python -m pip install .
+```
+
+Jika perintah tersebut tidak berhasil, repository sumber juga menyediakan metode instalasi berikut:
+
+```bash
+python setup.py install
+```
+
+Setelah instalasi selesai, kembali ke folder utama repository `pasut26`, kemudian uji apakah modul T_TIDE dapat diimpor:
+
+```bash
+python -c "from ttide.t_tide import t_tide; print('T_TIDE berhasil diimpor')"
+```
+
+Pastikan instalasi dan pengujian menggunakan environment/interpreter Python yang sama dengan yang digunakan untuk menjalankan skrip. Repository `ttide_py` menyebutkan bahwa proyek ini merupakan konversi T_TIDE yang masih dalam pengembangan dan pengujiannya terbatas. Oleh karena itu, lakukan pengujian pada environment yang digunakan sebelum menjalankan keseluruhan proses pengolahan.
+
+### 6.4. Memeriksa instalasi dan versi library
+
+Pemeriksaan dapat dilakukan langsung melalui **Anaconda Prompt**, **Command Prompt**, **PowerShell**, atau **terminal/console** pada editor seperti VS Code. Pemeriksaan tidak harus dilakukan melalui Jupyter Notebook atau IPython.
+
+**Cara A. Memeriksa library melalui terminal/console**
+
+Pastikan environment proyek sudah aktif, kemudian jalankan:
+
+```bash
+python --version
+python -m pip show numpy pandas scipy matplotlib pyTMD timescale UTide openpyxl plotly dash dash-leaflet reportlab ipython
+```
+
+Perintah `pip show` menampilkan informasi paket, termasuk versi yang terpasang. Jika suatu paket tidak ditemukan, paket tersebut belum terinstal pada environment yang sedang aktif.
+
+Untuk menguji T_TIDE secara terpisah, jalankan:
+
+```bash
+python -c "from ttide.t_tide import t_tide; print('T_TIDE berhasil diimpor')"
+```
+
+**Cara B. Memeriksa seluruh library menggunakan script Python**
+
+Buat file bernama `cek_library.py` di folder utama repository, lalu isi dengan kode berikut:
+
+```python
 import sys
+from importlib.metadata import version, PackageNotFoundError
 
 libraries = {
     "numpy": "NumPy",
@@ -313,21 +350,23 @@ libraries = {
     "dash": "Dash",
     "dash-leaflet": "dash-leaflet",
     "reportlab": "ReportLab",
-    "ipython": "IPython",
+    "ipython": "IPython"
 }
 
-print("PEMERIKSAAN VERSI LIBRARY")
-print("-" * 60)
+print("PEMERIKSAAN ENVIRONMENT DAN VERSI LIBRARY")
+print("-" * 65)
+print(f"Versi Python       : {sys.version.split()[0]}")
+print(f"Lokasi interpreter : {sys.executable}")
 
 for package, name in libraries.items():
     try:
-        print(f"{name:20} : {version(package)}")
+        print(f"{name:22} : {version(package)}")
     except PackageNotFoundError:
-        print(f"{name:20} : Belum terinstal")
+        print(f"{name:22} : Belum terinstal")
 
 ```
 
-Jalankan melalui Anaconda Prompt atau terminal:
+Jalankan script tersebut dari terminal/console dengan environment proyek yang sudah aktif:
 
 ```bash
 python cek_library.py
@@ -335,11 +374,14 @@ python cek_library.py
 
 Skrip menampilkan versi Python, lokasi interpreter, versi setiap library, dan informasi apabila suatu library belum terinstal.
 
-Jika muncul `ModuleNotFoundError`, periksa apakah environment yang benar sudah aktif:
+**Penting:** jika hasil pemeriksaan menunjukkan library belum terinstal atau muncul pesan `ModuleNotFoundError`, periksa apakah environment yang benar sudah aktif. Untuk melihat interpreter Python yang sedang digunakan, jalankan:
 
 ```bash
 python -c "import sys; print(sys.executable)"
 ```
+
+Lokasi interpreter tersebut harus sesuai dengan environment yang digunakan untuk memasang library dan menjalankan skrip.
+
 ---
 
 ## 7. Persiapan Data dan Model Pasut
