@@ -93,7 +93,7 @@ Proyek ini terdiri atas empat program utama:
 Struktur yang disarankan untuk repository:
 
 ```text
-dashboard-pasut-radar-pytmd/
+pasut26/
 │
 ├── README.md
 ├── requirements.txt
