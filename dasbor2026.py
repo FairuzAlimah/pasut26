@@ -82,15 +82,8 @@ if not OLAH_DIR.is_dir():
 OUTPUT_DIR_BY_YEAR = {y: OLAH_DIR / f"hasil_pasut_{y}" for y in YEARS}
 VALIDASI_DIR_BY_YEAR = {y: OLAH_DIR / f"hasil_validasi_eot20_{y}" for y in YEARS}
 
-# Logo & foto panduan: dicari di folder skrip
-def _cari_aset(nama, folder_pencarian):
-    for folder in folder_pencarian:
-        p = folder / nama
-        if p.exists():
-            return p
-    return folder_pencarian[0] / nama  # path default (belum ada -> dilewati otomatis)
-
-_FOLDER_ASET = [BASE_DIR]
+ASSETS_DIR = BASE_DIR / "assets"
+_FOTO_PANDUAN_DIR = ASSETS_DIR / "panduan"
 
 def csv_dir_prediksi(year):
     return OUTPUT_DIR_BY_YEAR[year] / "csv"
@@ -142,9 +135,9 @@ try:
     DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
 except OSError as e:
     print(f"[PERINGATAN] Folder dashboard tidak dapat dibuat: {e}")
-LOGO_BRIN = _cari_aset("logo_brin.png", _FOLDER_ASET)
-LOGO_DKP = _cari_aset("logo_dkp_diy.png", _FOLDER_ASET)
-PANDUAN_IMG_DIR = _cari_aset("foto_panduan", _FOLDER_ASET)
+LOGO_BRIN = ASSETS_DIR / "logo_brin.png"
+LOGO_DKP = ASSETS_DIR / "logo_dkp_diy.png"
+PANDUAN_IMG_DIR = _FOTO_PANDUAN_DIR
 INSTANSI_NAMA = "Pusat Riset Iklim dan Atmosfer, BRIN"
 INSTANSI_HOMEBASE = "Homebase Yogyakarta, KSTE Achmad Baiquni"
 KETERANGAN_MSL = (
@@ -4399,20 +4392,14 @@ def download_radar_pdf(n_clicks, selected_station, selected_month):
     filename = f"validasi_radar_{selected_station}_{selected_month}_{YEAR_VALIDASI_RADAR}.pdf".replace(" ", "_")
     return dcc.send_bytes(pdf_buffer.getvalue(), filename=filename)
 
-# 18. SALIN LOGO & FOTO PANDUAN KE ASSETS
-ASSETS_DIR = BASE_DIR / "assets"
+# 18. MEMASTIKAN FOLDER ASSETS TERSEDIA DAN MEMBACA FOTO PANDUAN
 ASSETS_DIR.mkdir(parents=True, exist_ok=True)
-if LOGO_BRIN.exists():
-    shutil.copy2(LOGO_BRIN, ASSETS_DIR / "logo_brin.png")
-if LOGO_DKP.exists():
-    shutil.copy2(LOGO_DKP, ASSETS_DIR / "logo_dkp_diy.png")
+PANDUAN_IMG_DIR.mkdir(parents=True, exist_ok=True)
 
-(ASSETS_DIR / "panduan").mkdir(parents=True, exist_ok=True)
 _foto_ditemukan = []
 for _nama in ("nelayan", "pemancing", "wisata", "pengelola"):
     _p = find_panduan_image(_nama)
     if _p is not None:
-        shutil.copy2(_p, ASSETS_DIR / "panduan" / _p.name)
         _foto_ditemukan.append(_nama)
 
 # 19. MENJALANKAN DASHBOARD
