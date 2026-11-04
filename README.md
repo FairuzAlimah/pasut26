@@ -68,23 +68,27 @@ Proyek ini terdiri atas empat program utama:
 
 ## 3. Teknologi dan Library
 
-| Komponen | Kegunaan |
-|---|---|
-| Python | Bahasa pemrograman utama |
-| NumPy | Operasi numerik dan array |
-| Pandas | Pengelolaan data tabular dan deret waktu |
-| SciPy | Statistik dan perhitungan numerik |
-| Matplotlib | Pembuatan grafik hasil pengolahan |
-| pyTMD | Perhitungan prediksi pasang surut berbasis model global |
-| timescale | Pembuatan rentang waktu untuk prediksi |
-| T_TIDE (`ttide`) | Analisis harmonik data radar |
-| UTide | Analisis harmonik alternatif/cadangan pada `analisisS.py` |
-| OpenPyXL | Membaca dan menulis berkas Excel |
-| Plotly | Grafik interaktif dashboard |
-| Dash | Kerangka aplikasi dashboard |
-| dash-leaflet | Peta interaktif |
-| ReportLab | Pembuatan laporan PDF |
-| IPython | Preview tabel ketika skrip dijalankan di lingkungan interaktif (opsional) |
+Proyek ini dikembangkan menggunakan Python dengan sejumlah library untuk pengolahan data numerik, analisis harmonik pasang surut, visualisasi, pengembangan dashboard interaktif, dan pembuatan laporan PDF.
+
+Versi berikut merupakan versi yang terpasang pada environment pengembangan yang digunakan.
+
+| Komponen | Versi | Kegunaan |
+|---|---:|---|
+| Python | 3.10.21 | Bahasa pemrograman utama |
+| NumPy | 2.2.6 | Operasi numerik dan array |
+| Pandas | 2.3.3 | Pengelolaan data tabular dan deret waktu |
+| SciPy | 1.15.2 | Statistik dan perhitungan numerik |
+| Matplotlib | 3.10.9 | Pembuatan grafik hasil pengolahan |
+| pyTMD | 3.0.9 | Perhitungan prediksi pasang surut berbasis model global |
+| timescale | 0.1.3 | Pengelolaan skala waktu untuk prediksi |
+| T_TIDE (`ttide`) | 0.3.dev2 | Analisis harmonik data radar |
+| UTide | 0.4.0 | Analisis harmonik alternatif/cadangan pada `analisisS.py` |
+| OpenPyXL | 3.1.5 | Membaca dan menulis berkas Excel |
+| Plotly | 7.1.0 | Pembuatan grafik interaktif |
+| Dash | 4.5.0 | Kerangka pengembangan dashboard |
+| dash-leaflet | 1.0.15 | Pembuatan peta interaktif |
+| ReportLab | 5.1.0 | Pembuatan laporan PDF |
+| IPython | 8.37.0 | Preview tabel pada lingkungan interaktif (opsional) |
 
 ---
 
@@ -211,11 +215,15 @@ Gunakan satu lingkungan Python yang sama untuk instalasi library, pengolahan, da
 
 ### 6.1 Perbarui pip
 
+Pastikan environment proyek sudah aktif, kemudian jalankan:
+
 ```bash
 python -m pip install --upgrade pip
 ```
 
-### 6.2 Instalasi seluruh library
+### 6.2 Instalasi library utama
+
+Dari folder utama repository, jalankan:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -283,24 +291,55 @@ Setelah menggunakan salah satu cara di atas, instal paket ke environment Python 
 
 Pastikan proses instalasi dan pengujian menggunakan interpreter Python yang sama dengan yang digunakan untuk menjalankan skrip. Repository `ttide_py` menyebutkan bahwa proyek ini merupakan konversi T_TIDE yang masih dalam pengembangan dan pengujiannya terbatas. Oleh karena itu, lakukan pengujian pada environment yang digunakan sebelum menjalankan keseluruhan proses.
 
-### 6.4 Periksa library
+### 6.5 Memeriksa versi seluruh library
 
-```bash
-python -c "import numpy, pandas, scipy, matplotlib, pyTMD, timescale, utide, dash, dash_leaflet, plotly, reportlab; print('Library utama berhasil diimpor')"
+Simpan kode berikut sebagai `cek_library.py` di folder utama repository:
+
+```python
+from importlib.metadata import version, PackageNotFoundError
+import sys
+
+libraries = {
+    "numpy": "NumPy",
+    "pandas": "Pandas",
+    "scipy": "SciPy",
+    "matplotlib": "Matplotlib",
+    "pyTMD": "pyTMD",
+    "timescale": "timescale",
+    "ttide": "T_TIDE",
+    "UTide": "UTide",
+    "openpyxl": "OpenPyXL",
+    "plotly": "Plotly",
+    "dash": "Dash",
+    "dash-leaflet": "dash-leaflet",
+    "reportlab": "ReportLab",
+    "ipython": "IPython",
+}
+
+print("PEMERIKSAAN VERSI LIBRARY")
+print("-" * 60)
+
+for package, name in libraries.items():
+    try:
+        print(f"{name:20} : {version(package)}")
+    except PackageNotFoundError:
+        print(f"{name:20} : Belum terinstal")
+
 ```
 
-Periksa T_TIDE secara terpisah:
+Jalankan melalui Anaconda Prompt atau terminal:
 
 ```bash
-python -c "from ttide.t_tide import t_tide; print('T_TIDE berhasil diimpor')"
+python cek_library.py
 ```
 
-Jika terjadi `ModuleNotFoundError`, periksa interpreter yang sedang aktif:
+Skrip menampilkan versi Python, lokasi interpreter, versi setiap library, dan informasi apabila suatu library belum terinstal.
+
+Jika muncul `ModuleNotFoundError`, periksa apakah environment yang benar sudah aktif:
 
 ```bash
 python -c "import sys; print(sys.executable)"
 ```
-
 ---
 
 ## 7. Persiapan Data dan Model Pasut
@@ -628,4 +667,3 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 **Pusat Riset Iklim dan Atmosfer, BRIN**
 
 Homebase Yogyakarta, KSTE Achmad Baiquni
-
