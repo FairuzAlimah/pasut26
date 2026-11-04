@@ -137,7 +137,7 @@ pasut26/
 - `OLAH/dataPB.xlsx` merupakan berkas masukan pengamatan radar yang digunakan oleh skrip.
 - `OLAH/` menjadi folder kerja untuk program prediksi dan validasi.
 - `HASIL_NAN0/` digunakan sebagai folder kerja analisis harmonik dan analisis gabungan.
-- `logo_brin.png`, `logo_dkp_diy.png`, dan `foto_panduan/` merupakan aset tampilan dashboard. Letakkan pada lokasi tersebut agar dapat ditemukan oleh aplikasi.
+- Folder `assets/` menyimpan seluruh aset tampilan dashboard, meliputi `logo_brin.png` dan `logo_dkp_diy.png` yang diletakkan langsung di dalam folder `assets/`, serta foto pendukung menu panduan pemanfaatan dashboard (`nelayan.jpg`, `pemancing.jpg`, `wisata.jpg`, dan `pengelola.jpg`) yang diletakkan di dalam subfolder `assets/panduan/`. Skrip dashboard memanggil logo dan foto tersebut secara langsung berdasarkan lokasi penyimpanannya, sehingga nama berkas dan struktur folder harus sesuai agar seluruh aset dapat ditampilkan dengan benar.
 - `pytmd_data/` menyimpan data model pasang surut secara lokal. Folder ini tidak perlu diunggah ke repository karena ukuran data model dapat besar.
 - Folder hasil di dalam `OLAH/` dan `HASIL_NAN0/` akan dibuat ketika skrip dijalankan. Folder hasil tidak wajib diunggah seluruhnya; cukup siapkan data masukan, skrip, dokumentasi, dan aset yang diperlukan.
 
