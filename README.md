@@ -481,85 +481,32 @@ Validasi GOT4.10–EOT20 merupakan validasi silang antar-model, bukan validasi t
 
 ### 8.2 Analisis Harmonik Data Radar (`t__tide.py`)
 
-Skrip `t__tide.py` digunakan untuk mengolah data pengamatan radar dengan
-interval satu menit menjadi deret waktu per jam, kemudian melakukan
-analisis harmonik pasang surut menggunakan metode **T_TIDE**.
+Skrip `t__tide.py` digunakan untuk mengolah data pengamatan radar pasang surut pada stasiun Baron dan Panggang (Gesing) selama Januari–Agustus 2026. Data pengamatan dengan interval satu menit diolah menjadi deret waktu rata-rata per jam, kemudian dianalisis menggunakan metode **T_TIDE** untuk memperoleh konstanta harmonik, karakteristik pasang surut, serta parameter elevasi muka air laut.
 
 Tahapan pengolahan yang dilakukan adalah sebagai berikut:
 
-1.  Membaca data waktu, kanal baterai, dan elevasi radar dari berkas
-    Excel.
-2.  Menghapus data dengan waktu yang tidak valid serta menangani waktu
-    duplikat.
-3.  Melakukan pemeriksaan kualitas data (*quality control*/QC) untuk
-    mendeteksi lonjakan (*spike*) dan nilai yang macet (*flatline*).
-    Pemeriksaan lonjakan menggunakan median bergerak dengan jendela 31
-    menit dan ambang penyimpangan 1,5 m terhadap median.
-4.  Mengagregasikan data menjadi rata-rata per jam. Setiap kelompok jam
-    harus memiliki sedikitnya 10 sampel agar nilai rata-ratanya
-    digunakan.
-5.  Menginterpolasi kekosongan data yang memenuhi batas maksimum 12 jam
-    sesuai konfigurasi skrip.
-6.  Mengubah deret waktu menjadi anomali terhadap nilai rata-ratanya
-    sebelum analisis harmonik.
-7.  Menjalankan analisis harmonik menggunakan fungsi `t_tide`.
-8.  Menghitung rasio sinyal terhadap derau (*Signal-to-Noise Ratio*/SNR)
-    dengan rumus ((A/E_A)\^2), yaitu kuadrat rasio amplitudo terhadap
-    galat amplitudo.
-9.  Menandai konstanta harmonik sebagai signifikan apabila nilai SNR
-    lebih besar dari 1.
-10. Menghitung Formzahl untuk mengidentifikasi tipe pasang surut apabila
-    konstanta harmonik penyusunnya tersedia.
-11. Menghitung parameter elevasi pasang surut serta menyimpan hasil
-    dalam bentuk tabel dan grafik.
+1. Membaca data pengamatan radar dari berkas `OLAH/dataPB.xlsx` berdasarkan nama sheet stasiun dan bulan. Data yang digunakan meliputi waktu pengamatan, kanal baterai, dan elevasi radar.
+2. Melakukan pemeriksaan validitas waktu, menghapus data dengan waktu tidak valid, mengurutkan data berdasarkan waktu, serta menangani waktu duplikat.
+3. Melakukan pemeriksaan kualitas data (*quality control*/QC) untuk mendeteksi nilai yang macet (*flatline*) dan lonjakan (*spike*). Deteksi flatline dilakukan terhadap rangkaian nilai yang sama selama minimal 30 menit. Deteksi spike menggunakan median bergerak dengan jendela 31 menit dan metode robust sigma berbasis Median Absolute Deviation (MAD). Ambang penghapusan spike ditentukan berdasarkan nilai terbesar antara 0,5 m dan empat kali robust sigma.
+4. Mengagregasikan data menjadi rata-rata per jam menggunakan interval `[hh:00, hh+1:00)`, dengan label waktu pada menit ke-30. Setiap kelompok jam harus memiliki sedikitnya 20 sampel agar nilai rata-ratanya digunakan. Jam yang tidak memenuhi persyaratan tersebut ditandai sebagai `NaN`.
+5. Melakukan interpolasi berbasis waktu menggunakan metode `time` untuk mengisi kekosongan data yang berada di antara data valid. Interpolasi hanya diterapkan pada gap utuh dengan durasi maksimal 6 jam, sedangkan gap yang lebih panjang tetap dipertahankan sebagai `NaN`.
+6. Mengubah deret waktu menjadi anomali muka air dengan mengurangi setiap nilai pengamatan terhadap nilai rata-rata deret waktu. Perhitungan rata-rata mengabaikan nilai `NaN`.
+7. Mengubah nilai `NaN` yang masih tersisa menjadi 0 pada deret anomali sebelum diproses oleh T_TIDE, sesuai konfigurasi `NAN_JADI_NOL = True`. Nilai 0 menunjukkan anomali sebesar nol atau kondisi pada nilai rata-rata muka air, bukan penambahan hasil pengamatan baru.
+8. Menjalankan analisis harmonik menggunakan fungsi `t_tide` dengan interval data satu jam (`dt=1`) dan memasukkan koordinat lintang masing-masing stasiun.
+9. Mengekstrak konstanta harmonik yang meliputi nama konstanta, frekuensi, periode, amplitudo, fase, serta galat amplitudo dan fase.
+10. Menghitung rasio sinyal terhadap derau (*Signal-to-Noise Ratio*/SNR) menggunakan rumus:
 
-Pada konfigurasi yang digunakan, nilai `NaN` yang masih tersisa pada
-data anomali diubah menjadi 0 sebelum diproses oleh T_TIDE. Nilai 0
-tersebut menunjukkan anomali sebesar nol atau kondisi pada nilai
-rata-rata, bukan penambahan hasil pengamatan baru.
+    `SNR = (Amplitudo / Galat Amplitudo)^2`
 
-Parameter elevasi yang dihitung meliputi **Z0, S0/MSL, HHWL, MHWL, LLWL,
-dan MLWL**. Perhitungan parameter tersebut mengikuti rumus dan konstanta
-yang diterapkan dalam skrip.
-
-### 8.3 Analisis Radar terhadap GOT4.10 dan EOT20 (`analisisS.py`)
-
-Skrip `analisisS.py` digunakan untuk membandingkan data pengamatan radar
-dengan hasil model pasang surut **GOT4.10** dan **EOT20** pada stasiun
-Baron dan Panggang selama Januari--Agustus 2026. Pengolahan dilakukan
-untuk mengevaluasi kesesuaian deret waktu pengamatan dan model,
-sekaligus membandingkan karakteristik konstanta harmoniknya.
-
-Tahapan utama pengolahan adalah sebagai berikut:
-
-1.  Membaca data radar dari `OLAH/dataPB.xlsx`.
-2.  Mengidentifikasi lembar kerja (*sheet*) berdasarkan nama stasiun dan
-    bulan pengamatan.
-3.  Melakukan QC untuk mendeteksi nilai macet dan lonjakan pada data
-    radar.
-4.  Mengubah data radar menjadi rata-rata per jam dengan persyaratan
-    jumlah sampel minimum pada setiap jam.
-5.  Menginterpolasi kekosongan data yang masih berada dalam batas
-    konfigurasi.
-6.  Menyesuaikan waktu pengamatan ke UTC agar sesuai dengan waktu data
-    model.
-7.  Membaca konstanta harmonik radar dari hasil analisis T_TIDE. Jika
-    berkas konstanta tidak ditemukan dan opsi cadangan diaktifkan,
-    konstanta harmonik dihitung menggunakan UTide.
-8.  Mengekstrak konstanta harmonik dari model GOT4.10 dan EOT20.
-9.  Menyamakan waktu data radar dan model, kemudian membandingkan deret
-    waktu pada waktu yang bersesuaian.
-10. Menghitung metrik statistik serta membandingkan amplitudo dan fase
-    konstanta harmonik.
-11. Melakukan analisis sensitivitas dengan beberapa skenario ambang
-    kecocokan konstanta harmonik.
-12. Menyimpan hasil pengolahan berupa ringkasan, data detail, grafik,
-    dan berkas Excel.
+    Konstanta harmonik dinyatakan signifikan apabila nilai SNR lebih besar dari 1.
+11. Menghitung bilangan Formzahl menggunakan perbandingan amplitudo konstanta K1, O1, M2, dan S2 untuk mengidentifikasi tipe pasang surut apabila seluruh konstanta tersebut tersedia.
+12. Menghitung parameter elevasi muka air laut, meliputi Z0, S0/MSL, HHWL, MHWL, LLWL, dan MLWL berdasarkan konstanta harmonik yang diperoleh.
+13. Membandingkan data pengamatan per jam dengan hasil prediksi harmonik T_TIDE untuk memperoleh deret prediksi dan residu. Residu dihitung sebagai selisih antara data pengamatan dan prediksi pasang surut.
+14. Menyimpan hasil pengolahan dalam bentuk tabel Excel, grafik deret waktu, grafik amplitudo dan fase, serta rekapitulasi hasil analisis seluruh stasiun dan bulan.
 
 #### Parameter QC dan pengolahan
 
-Parameter utama yang digunakan pada konfigurasi `analisisS.py` adalah
-sebagai berikut.
+Parameter yang digunakan pada konfigurasi `t__tide.py` adalah sebagai berikut.
 
 | Parameter | Nilai |
 |---|---:|
@@ -568,31 +515,151 @@ sebagai berikut.
 | Ambang minimum lonjakan | 0,5 m |
 | Durasi nilai datar untuk dianggap macet | 30 menit |
 | Sampel minimum per jam | 20 |
+| Metode interpolasi | Time |
 | Batas interpolasi | 6 jam |
+| SNR minimum | 1 |
+| Pengisian NaN pada anomali | 0 |
+
+#### Perhitungan parameter elevasi
+
+Parameter elevasi dihitung berdasarkan konstanta harmonik yang diperoleh dari hasil analisis T_TIDE.
+
+| Parameter | Perhitungan |
+|---|---|
+| Z0 | Jumlah amplitudo M2, S2, K2, K1, O1, dan P1 |
+| S0/MSL | Muka air rata-rata hasil penyesuaian prediksi harmonik terhadap data pengamatan |
+| HHWL | S0 + Z0 |
+| MHWL | S0 + jumlah amplitudo M2, K1, dan O1 |
+| LLWL | S0 - Z0 |
+| MLWL | S0 - jumlah amplitudo M2, K1, dan O1 |
+
+Perhitungan MHWL dan MLWL menggunakan S0 sebagai nilai acuan melalui konfigurasi `ACUAN_MHWL_MLWL = "S0"`. Seluruh amplitudo yang digunakan dalam perhitungan parameter elevasi dinyatakan dalam meter.
+
+#### Keluaran pengolahan
+
+Hasil pengolahan disimpan pada folder `HASIL_NAN0/`, meliputi:
+
+- `hasil_harmonik_<stasiun>_<bulan>.xlsx`: tabel konstanta harmonik, ringkasan hasil analisis, dan deret waktu per jam.
+- `rekap_semua_bulan.xlsx`: rekapitulasi konstanta harmonik, elevasi penting, dan amplitudo konstanta signifikan seluruh data.
+- `tabel_elevasi_muka_laut.xlsx`: rekapitulasi parameter elevasi muka air laut.
+- Grafik perbandingan data pengamatan dan prediksi harmonik.
+- Grafik amplitudo dan fase konstanta harmonik.
+- Grafik rekapitulasi amplitudo dan fase konstanta utama antarstasiun dan bulan.
+
+---
+
+### 8.3 Analisis Radar terhadap GOT4.10 dan EOT20 (`analisisS.py`)
+
+Skrip `analisisS.py` digunakan untuk membandingkan data pengamatan radar dengan hasil prediksi model pasang surut **GOT4.10** dan **EOT20** pada stasiun Baron dan Panggang (Gesing) selama Januari–Agustus 2026.
+
+Pengolahan dilakukan menggunakan pustaka `pyTMD` untuk memperoleh prediksi deret waktu dan konstanta harmonik dari kedua model. Analisis mencakup perbandingan deret waktu pengamatan dengan model, evaluasi statistik, perbandingan karakteristik konstanta harmonik, serta analisis sensitivitas terhadap ambang kecocokan konstanta harmonik.
+
+Tahapan utama pengolahan adalah sebagai berikut:
+
+1. Membaca data pengamatan radar dari `OLAH/dataPB.xlsx` dengan mengidentifikasi sheet berdasarkan nama stasiun dan bulan pengamatan.
+2. Melakukan pemeriksaan validitas waktu, mengidentifikasi kolom elevasi radar, menghapus waktu duplikat, serta membatasi data sesuai bulan dan tahun analisis.
+3. Melakukan pemeriksaan kualitas data (QC) untuk mendeteksi nilai macet (*flatline*) dan lonjakan (*spike*) menggunakan metode median bergerak dan robust sigma berbasis MAD.
+4. Mengagregasikan data radar menjadi rata-rata per jam dengan persyaratan minimal 20 sampel pada setiap jam.
+5. Menginterpolasi kekosongan data menggunakan metode `time` untuk gap utuh maksimal 6 jam. Kekosongan yang lebih panjang tetap dipertahankan sebagai `NaN`.
+6. Menyesuaikan waktu pengamatan ke UTC berdasarkan informasi zona waktu pada header sheet. Apabila informasi zona waktu tidak tersedia, skrip menggunakan konfigurasi cadangan `TZ_RADAR_JAM = 0`.
+7. Mengambil konstanta harmonik radar dari berkas hasil analisis `t__tide.py` yang tersimpan dalam folder `HASIL_NAN0/`. Apabila berkas T_TIDE tidak ditemukan, skrip secara otomatis menghitung ulang konstanta harmonik menggunakan UTide karena `HARMONIK_CADANGAN_AKTIF = True`.
+8. Mengekstrak konstanta harmonik dari model GOT4.10 dan EOT20 menggunakan `pyTMD` berdasarkan koordinat geografis stasiun. Konstanta yang diperoleh meliputi amplitudo dan fase masing-masing komponen harmonik.
+9. Menghitung prediksi deret waktu pasang surut dari GOT4.10 dan EOT20 pada waktu pengamatan radar menggunakan metode interpolasi `nearest`.
+10. Membentuk anomali data radar dan masing-masing model terhadap nilai rata-rata bulanannya. Apabila `NAN_JADI_NOL = True`, nilai radar yang masih `NaN` diisi dengan rata-rata radar sehingga menghasilkan anomali sebesar nol.
+11. Menyamakan waktu pengamatan radar dan prediksi model, kemudian membandingkan deret waktu pada waktu yang bersesuaian.
+12. Menghitung metrik statistik untuk mengevaluasi kesesuaian antara data radar dan masing-masing model.
+13. Membandingkan amplitudo dan fase konstanta harmonik radar yang signifikan dengan konstanta harmonik GOT4.10 dan EOT20.
+14. Melakukan analisis sensitivitas menggunakan tiga skenario ambang kecocokan konstanta harmonik, yaitu ketat, dasar, dan longgar.
+15. Menyimpan hasil pengolahan berupa tabel ringkasan, data detail, grafik perbandingan, dan berkas Excel.
+
+#### Parameter QC dan pengolahan
+
+Parameter utama yang digunakan pada konfigurasi `analisisS.py` adalah sebagai berikut.
+
+| Parameter | Nilai |
+|---|---:|
+| Jendela median bergerak | 31 menit |
+| Batas robust sigma | 4 |
+| Ambang minimum lonjakan | 0,5 m |
+| Durasi nilai datar untuk dianggap macet | 30 menit |
+| Sampel minimum per jam | 20 |
+| Metode interpolasi radar | Time |
+| Batas interpolasi | 6 jam |
+| Metode interpolasi model | Nearest |
+| Batas ekstrapolasi deret waktu | 50 km |
+| Batas ekstrapolasi konstanta harmonik | 100 km |
 | Lag maksimum yang diperiksa | 8 jam |
 | SNR minimum | 1 |
+| Zona waktu radar default | UTC (0 jam) |
 
-Metrik perbandingan:
+#### Metrik perbandingan deret waktu
 
-- **RMSE:** akar dari rata-rata kuadrat selisih antara data radar dan model.
-- **MAE:** rata-rata nilai absolut selisih.
-- **Pearson r:** tingkat korelasi linear antara dua deret.
-- **Willmott's d:** indeks kesesuaian antara dua deret.
-- **Lag:** pergeseran waktu yang menghasilkan kecocokan korelasi terbaik dalam batas pencarian program.
+Evaluasi kesesuaian data radar dan model dilakukan menggunakan beberapa metrik statistik sebagai berikut.
 
-Analisis sensitivitas menggunakan tiga skenario ambang:
+- **Bias:** rata-rata selisih antara prediksi model dan pengamatan radar. Nilai positif menunjukkan model cenderung menghasilkan nilai lebih tinggi daripada radar.
+- **RMSE (Root Mean Square Error):** akar dari rata-rata kuadrat selisih antara data model dan radar. Nilai yang lebih kecil menunjukkan kesalahan prediksi yang lebih rendah.
+- **MAE (Mean Absolute Error):** rata-rata nilai absolut selisih antara data model dan radar.
+- **Pearson r:** mengukur kekuatan dan arah hubungan linear antara data radar dan model. Nilai yang mendekati 1 menunjukkan korelasi positif yang kuat.
+- **R²:** kuadrat koefisien korelasi Pearson yang menggambarkan kekuatan hubungan linear.
+- **Willmott's d:** indeks kesesuaian antara data pengamatan dan model. Nilai yang mendekati 1 menunjukkan tingkat kesesuaian yang lebih baik.
+- **Kemiringan (Slope):** menggambarkan perubahan nilai model terhadap perubahan nilai radar berdasarkan regresi linear.
+- **Lag:** pergeseran waktu yang menghasilkan korelasi terbaik antara data radar dan model dalam rentang pencarian maksimal ±8 jam. Nilai lag positif menunjukkan pola model muncul lebih awal daripada radar, sedangkan nilai negatif menunjukkan pola model muncul lebih lambat.
 
-| Skenario | Selisih amplitudo | Selisih amplitudo relatif | Selisih fase |
+Metrik kesalahan dihitung dalam satuan sentimeter, sedangkan korelasi, R², Willmott's d, dan kemiringan merupakan nilai tanpa satuan.
+
+#### Perbandingan konstanta harmonik
+
+Perbandingan konstanta harmonik dilakukan terhadap konstanta radar yang memenuhi kriteria signifikan, yaitu SNR lebih besar dari 1. Konstanta radar tersebut dicocokkan dengan konstanta harmonik yang tersedia pada model GOT4.10 dan EOT20.
+
+Parameter yang dibandingkan meliputi:
+
+- Amplitudo harmonik radar dan model dalam sentimeter.
+- Selisih amplitudo absolut dalam sentimeter.
+- Selisih amplitudo relatif dalam persen.
+- Fase harmonik radar dan model dalam derajat.
+- Selisih fase sirkular dalam rentang -180° hingga 180°.
+- Selisih vektor harmonik yang mempertimbangkan perbedaan amplitudo dan fase.
+
+Ringkasan evaluasi konstanta harmonik meliputi jumlah konstanta yang dibandingkan, jumlah konstanta yang memenuhi kriteria kecocokan, RMSE amplitudo, MAE amplitudo, bias amplitudo, RMSE fase, MAE fase, dan RMSE vektor.
+
+#### Analisis sensitivitas ambang kecocokan konstanta harmonik
+
+Analisis sensitivitas dilakukan untuk mengetahui pengaruh perubahan toleransi amplitudo dan fase terhadap persentase konstanta harmonik yang dinyatakan cocok antara radar dan model.
+
+Terdapat tiga skenario ambang yang digunakan sebagai berikut.
+
+| Skenario | Selisih amplitudo absolut | Selisih amplitudo relatif | Selisih fase |
 |---|---:|---:|---:|
 | Ketat | 1 cm | 10% | 10° |
 | Dasar | 2 cm | 20% | 20° |
 | Longgar | 3 cm | 30% | 30° |
 
-Suatu konstanta harmonik dinyatakan cocok apabila selisih amplitudonya
-memenuhi batas absolut **atau** batas relatif yang ditentukan pada
-skenario, serta selisih fasenya memenuhi batas skenario yang sama.
-Dengan demikian, skenario ketat menggunakan toleransi paling kecil,
-sedangkan skenario longgar memberikan toleransi paling besar.
+Suatu konstanta harmonik dinyatakan cocok apabila memenuhi dua ketentuan berikut:
+
+1. Selisih amplitudo absolut memenuhi batas toleransi dalam sentimeter **atau** selisih amplitudo relatif memenuhi batas toleransi dalam persen.
+2. Selisih fase memenuhi batas toleransi dalam derajat pada skenario yang sama.
+
+Dengan demikian, rumus penentuan kecocokan adalah:
+
+`(|dAmp_cm| <= toleransi_cm ATAU |dAmp_%| <= toleransi_persen) DAN |dFase_deg| <= toleransi_fase`
+
+Hasil analisis sensitivitas digunakan untuk menghitung jumlah dan persentase konstanta harmonik yang cocok pada setiap skenario, baik berdasarkan kombinasi stasiun-bulan-model maupun secara agregat untuk masing-masing model.
+
+Persentase kecocokan dihitung menggunakan rumus:
+
+`Persentase kecocokan = (Jumlah konstanta cocok / Jumlah konstanta dibandingkan) x 100%`
+
+Hasil ketiga skenario kemudian dibandingkan untuk mengidentifikasi model dengan persentase kecocokan tertinggi. Perbandingan ini juga digunakan untuk mengetahui apakah pemilihan model terbaik tetap konsisten ketika toleransi kecocokan diperketat atau diperlonggar.
+
+#### Keluaran pengolahan
+
+Seluruh hasil analisis disimpan pada folder `HASIL_NAN0/ANALISIS_SENSITIVITAS/`, meliputi:
+
+- `analisis_pasut_gabungan_2026.xlsx`: berkas utama yang berisi ringkasan deret waktu, ringkasan konstanta harmonik, detail perbandingan konstanta, data harmonik radar, konstanta model, hasil sensitivitas, dan parameter pengolahan.
+- Grafik deret waktu radar terhadap GOT4.10 dan EOT20 beserta residu perbandingan.
+- Grafik sebar (*scatter plot*) antara radar dan masing-masing model.
+- Grafik perbandingan amplitudo dan fase konstanta harmonik.
+- `rekap_gabungan.png`: grafik rekapitulasi hasil evaluasi deret waktu dan konstanta harmonik untuk seluruh stasiun dan bulan.
 
 ### 8.4 Dashboard, `dasbor2026.py`
 
