@@ -1,7 +1,6 @@
 """
 Analisis harmonik pasut (t_tide) - data radar Panggang (Gesing) & Baron.
-NaN yang tersisa (setelah interpolasi gap pendek) diubah menjadi 0
-pada deret anomali sebelum masuk ke t_tide. Atur lewat NAN_JADI_NOL.
+NaN yang tersisa (setelah interpolasi gap pendek) diubah menjadi 0.
 """
 import os
 import warnings
@@ -51,12 +50,14 @@ DAFTAR = [
     ("baron_Juli26",     "Baron",    "Juli", LAT_BARON),
 ]
 
-SPIKE_MAX_M        = 1.5
-RESID_MAX_M        = 0.5
-RESID_MAX_SIGMA    = 5.0
-MIN_SAMPEL_PER_JAM = 10
+# Parameter QC radar disamakan dengan analisisS.py
+QC_JENDELA_MENIT   = 31
+QC_N_SIGMA         = 4.0
+QC_MIN_AMBANG_M    = 0.5
+QC_RUN_DATAR_MENIT = 30
+MIN_SAMPEL_PER_JAM = 20
 INTERP_METODE      = "time"
-INTERP_MAX_JAM     = 12
+INTERP_MAX_JAM     = 6
 SNR_MIN            = 1.0
 KONSTA_UTAMA       = ["S2", "O1", "M2", "K1"]
 RESIDU_SUMBU_KANAN = False
@@ -92,17 +93,40 @@ def baca_sheet(path, sheet):
     return df
 
 def buang_spike(df):
-    """Buang titik yang menyimpang jauh dari median bergulir 31 menit."""
-    s = df.set_index("waktu")["rad"]
-    med = s.rolling(31, center=True, min_periods=5).median()
-    spike = (s - med).abs() > SPIKE_MAX_M
-    s = s.mask(spike)
-    return s.reset_index(), int(spike.sum())
+    """QC per menit: buang flatline >=30 menit dan spike berbasis median/MAD.
+    Parameter dan algoritma disamakan dengan bersihkan_radar() pada analisisS.py.
+    """
+    s = df.set_index("waktu")["rad"].astype(float).copy()
+
+    # Deteksi data macet/flatline
+    sama = s.diff().eq(0)
+    grup = (sama != sama.shift()).cumsum()
+    panjang = sama.groupby(grup).transform("sum")
+    macet = sama & (panjang >= QC_RUN_DATAR_MENIT - 1)
+    macet = macet | (macet.shift(-1, fill_value=False) & ~macet)
+    n_macet = int(macet.sum())
+    s = s[~macet]
+
+    # Deteksi lonjakan dengan rolling median dan robust sigma (MAD)
+    med = s.rolling(QC_JENDELA_MENIT, center=True, min_periods=5).median()
+    residu = s - med
+    sigma = 1.4826 * np.nanmedian(np.abs(residu - np.nanmedian(residu)))
+    ambang = max(QC_MIN_AMBANG_M, QC_N_SIGMA * sigma)
+    spike = residu.abs() > ambang
+    n_spike = int(spike.sum())
+    s = s[~spike]
+
+    print(f"  QC radar: flatline dibuang={n_macet}; spike dibuang={n_spike}; "
+          f"ambang spike={ambang:.3f} m")
+    return s.rename("rad").reset_index(), n_macet + n_spike
+
 
 def ke_per_jam(df):
-    """Rata-rata per jam; jendela berpusat di jam bulat (mis. 05:30-06:30 -> 06:00)."""
+    """Rata-rata per jam pada interval [hh:00, hh+1:00), label di hh:30.
+    Sama dengan radar_per_jam() pada analisisS.py.
+    """
     s = df.set_index("waktu")["rad"]
-    grup = s.resample("1h", offset="-30min")
+    grup = s.resample("1h", closed="left", label="left")
     rata = grup.mean()
     n = grup.count()
     rata[n < MIN_SAMPEL_PER_JAM] = np.nan
@@ -110,11 +134,13 @@ def ke_per_jam(df):
     penuh = pd.date_range(rata.index[0], rata.index[-1], freq="1h")
     return rata.reindex(penuh)
 
+
 def isi_gap(h):
-    """Interpolasi hanya untuk gap yang panjangnya <= INTERP_MAX_JAM (utuh, bukan sebagian).
-    Kembalikan (deret terisi, mask jam hasil interpolasi)."""
+    """Interpolasi berbasis waktu hanya untuk gap utuh <= 6 jam.
+    Gap lebih panjang dibiarkan NaN agar penanganannya konsisten di kedua skrip.
+    """
     kosong = h.isna().values
-    terisi = h.interpolate(method=INTERP_METODE, limit_area="inside")
+    terinterpolasi = h.interpolate(method=INTERP_METODE, limit_area="inside")
     boleh = np.zeros(len(h), dtype=bool)
     i = 0
     while i < len(h):
@@ -128,17 +154,9 @@ def isi_gap(h):
         else:
             i += 1
     hasil = h.copy()
-    hasil[boleh] = terisi[boleh]
+    hasil[boleh] = terinterpolasi[boleh]
     interp = pd.Series(boleh & hasil.notna().values, index=h.index)
     return hasil, interp
-
-def cari_outlier_residu(h_asli, lintang):
-    _, _, pred, _ = analisis(h_asli, lintang)
-    resid = h_asli.values - pred
-    sigma = 1.4826 * np.nanmedian(np.abs(resid - np.nanmedian(resid)))
-    batas = max(RESID_MAX_M, RESID_MAX_SIGMA * sigma)
-    out = np.abs(resid) > batas
-    return pd.Series(out & ~np.isnan(resid), index=h_asli.index), batas
 
 def jalankan_ttide(anomali, stime, lintang):
     """Panggil t_tide dan seragamkan hasilnya menjadi dict:
@@ -524,14 +542,9 @@ for sheet, stasiun, bulan, lintang in DAFTAR:
 
     raw, n_spike = buang_spike(raw)
     h_asli = ke_per_jam(raw)
-    h0, _ = isi_gap(h_asli)
-    out_res, batas = cari_outlier_residu(h0, lintang)
-    out_res &= ~h_asli.isna()                     # hanya jam yang aslinya punya data
-    n_outlier = int(out_res.sum())
-    h_asli = h_asli.mask(out_res)
     h, interp = isi_gap(h_asli)
-    print(f"  data mentah : {len(raw)} baris (spike dibuang: {n_spike})  ->  per jam : {len(h)} jam")
-    print(f"  jam outlier residu dibuang (> {batas:.2f} m): {n_outlier}")
+    n_outlier = 0  # QC residual harmonik dinonaktifkan agar QC kedua skrip identik
+    print(f"  data mentah : {len(raw)} baris (flatline/spike dibuang: {n_spike})  ->  per jam : {len(h)} jam")
     print(f"  jam kosong  : {int(h_asli.isna().sum())}  |  diinterpolasi : "
           f"{int(interp.sum())}  |  masih NaN : {int(h.isna().sum())}")
     if NAN_JADI_NOL:
