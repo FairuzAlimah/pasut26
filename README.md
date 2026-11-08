@@ -479,47 +479,87 @@ Tahapan pengolahan:
 
 Validasi GOT4.10–EOT20 merupakan validasi silang antar-model, bukan validasi terhadap pengamatan lapangan. Interpretasi hasil harus mempertimbangkan bahwa kedua model merupakan produk model pasang surut.
 
-### 8.2 Analisis harmonik data radar, `t__tide.py`
+### 8.2 Analisis Harmonik Data Radar (`t__tide.py`)
 
-Skrip ini mengolah data radar dari interval pengamatan satu menit menjadi deret waktu per jam, kemudian melakukan analisis harmonik menggunakan T_TIDE.
+Skrip `t__tide.py` digunakan untuk mengolah data pengamatan radar dengan
+interval satu menit menjadi deret waktu per jam, kemudian melakukan
+analisis harmonik pasang surut menggunakan metode **T_TIDE**.
 
-Tahapan pengolahan:
+Tahapan pengolahan yang dilakukan adalah sebagai berikut:
 
-1. Membaca data waktu, kanal baterai, dan elevasi radar dari Excel.
-2. Menghapus waktu yang tidak valid dan waktu duplikat.
-3. Melakukan pemeriksaan lonjakan (*spike*) menggunakan median bergerak 31 menit. Nilai yang menyimpang lebih dari 1,5 m terhadap median ditandai sebagai spike.
-4. Mengubah data menjadi interval per jam dengan kebutuhan minimal 10 sampel pada setiap kelompok jam.
-5. Menginterpolasi kekosongan data yang memenuhi batas maksimum 12 jam.
-6. Menghitung analisis harmonik menggunakan fungsi `t_tide`.
-7. Menghitung rasio sinyal terhadap derau (*Signal-to-Noise Ratio/SNR*) menggunakan `(amplitudo / error amplitudo)^2`.
-8. Menandai konstanta harmonik signifikan jika SNR lebih besar dari 1.
-9. Menghitung Formzahl untuk mengidentifikasi tipe pasang surut apabila konstanta penyusunnya tersedia.
-10. Menghitung parameter elevasi penting dan menyimpan tabel serta grafik.
+1.  Membaca data waktu, kanal baterai, dan elevasi radar dari berkas
+    Excel.
+2.  Menghapus data dengan waktu yang tidak valid serta menangani waktu
+    duplikat.
+3.  Melakukan pemeriksaan kualitas data (*quality control*/QC) untuk
+    mendeteksi lonjakan (*spike*) dan nilai yang macet (*flatline*).
+    Pemeriksaan lonjakan menggunakan median bergerak dengan jendela 31
+    menit dan ambang penyimpangan 1,5 m terhadap median.
+4.  Mengagregasikan data menjadi rata-rata per jam. Setiap kelompok jam
+    harus memiliki sedikitnya 10 sampel agar nilai rata-ratanya
+    digunakan.
+5.  Menginterpolasi kekosongan data yang memenuhi batas maksimum 12 jam
+    sesuai konfigurasi skrip.
+6.  Mengubah deret waktu menjadi anomali terhadap nilai rata-ratanya
+    sebelum analisis harmonik.
+7.  Menjalankan analisis harmonik menggunakan fungsi `t_tide`.
+8.  Menghitung rasio sinyal terhadap derau (*Signal-to-Noise Ratio*/SNR)
+    dengan rumus ((A/E_A)\^2), yaitu kuadrat rasio amplitudo terhadap
+    galat amplitudo.
+9.  Menandai konstanta harmonik sebagai signifikan apabila nilai SNR
+    lebih besar dari 1.
+10. Menghitung Formzahl untuk mengidentifikasi tipe pasang surut apabila
+    konstanta harmonik penyusunnya tersedia.
+11. Menghitung parameter elevasi pasang surut serta menyimpan hasil
+    dalam bentuk tabel dan grafik.
 
-Pada konfigurasi saat ini, nilai NaN yang masih tersisa pada anomali diubah menjadi 0 sebelum masuk ke T_TIDE. Nilai 0 tersebut merepresentasikan anomali terhadap rata-rata, bukan hasil pengamatan baru.
+Pada konfigurasi yang digunakan, nilai `NaN` yang masih tersisa pada
+data anomali diubah menjadi 0 sebelum diproses oleh T_TIDE. Nilai 0
+tersebut menunjukkan anomali sebesar nol atau kondisi pada nilai
+rata-rata, bukan penambahan hasil pengamatan baru.
 
-Parameter elevasi yang dihitung mencakup Z0, S0/MSL, HHWL, MHWL, LLWL, dan MLWL. Rumus dan konstanta penyusunnya mengikuti konfigurasi pada skrip.
+Parameter elevasi yang dihitung meliputi **Z0, S0/MSL, HHWL, MHWL, LLWL,
+dan MLWL**. Perhitungan parameter tersebut mengikuti rumus dan konstanta
+yang diterapkan dalam skrip.
 
-### 8.3 Analisis radar terhadap GOT4.10 dan EOT20, `analisisS.py`
+### 8.3 Analisis Radar terhadap GOT4.10 dan EOT20 (`analisisS.py`)
 
-Skrip ini membandingkan data pengamatan radar dengan hasil model pasang surut GOT4.10 dan EOT20 untuk stasiun Baron dan Panggang selama Januari–Agustus 2026.
+Skrip `analisisS.py` digunakan untuk membandingkan data pengamatan radar
+dengan hasil model pasang surut **GOT4.10** dan **EOT20** pada stasiun
+Baron dan Panggang selama Januari--Agustus 2026. Pengolahan dilakukan
+untuk mengevaluasi kesesuaian deret waktu pengamatan dan model,
+sekaligus membandingkan karakteristik konstanta harmoniknya.
 
-Tahapan utama:
+Tahapan utama pengolahan adalah sebagai berikut:
 
-1. Membaca data radar dari `OLAH/dataPB.xlsx`.
-2. Mengidentifikasi sheet berdasarkan nama stasiun dan bulan.
-3. Melakukan QC untuk mendeteksi nilai macet dan lonjakan.
-4. Mengubah data radar menjadi rata-rata per jam.
-5. Menginterpolasi kekosongan data sesuai batas konfigurasi.
-6. Menyesuaikan waktu data ke UTC.
-7. Membaca konstanta harmonik radar dari hasil T_TIDE. Jika berkas tidak ditemukan dan pengaturan cadangan aktif, konstanta dihitung menggunakan UTide.
-8. Mengekstrak konstanta harmonik dari GOT4.10 dan EOT20.
-9. Membandingkan deret waktu radar dan model pada waktu yang sama.
-10. Menghitung metrik statistik dan membandingkan amplitudo serta fase konstanta harmonik.
-11. Melakukan analisis sensitivitas ambang kecocokan konstanta.
-12. Menyimpan ringkasan, detail, grafik, dan berkas Excel.
+1.  Membaca data radar dari `OLAH/dataPB.xlsx`.
+2.  Mengidentifikasi lembar kerja (*sheet*) berdasarkan nama stasiun dan
+    bulan pengamatan.
+3.  Melakukan QC untuk mendeteksi nilai macet dan lonjakan pada data
+    radar.
+4.  Mengubah data radar menjadi rata-rata per jam dengan persyaratan
+    jumlah sampel minimum pada setiap jam.
+5.  Menginterpolasi kekosongan data yang masih berada dalam batas
+    konfigurasi.
+6.  Menyesuaikan waktu pengamatan ke UTC agar sesuai dengan waktu data
+    model.
+7.  Membaca konstanta harmonik radar dari hasil analisis T_TIDE. Jika
+    berkas konstanta tidak ditemukan dan opsi cadangan diaktifkan,
+    konstanta harmonik dihitung menggunakan UTide.
+8.  Mengekstrak konstanta harmonik dari model GOT4.10 dan EOT20.
+9.  Menyamakan waktu data radar dan model, kemudian membandingkan deret
+    waktu pada waktu yang bersesuaian.
+10. Menghitung metrik statistik serta membandingkan amplitudo dan fase
+    konstanta harmonik.
+11. Melakukan analisis sensitivitas dengan beberapa skenario ambang
+    kecocokan konstanta harmonik.
+12. Menyimpan hasil pengolahan berupa ringkasan, data detail, grafik,
+    dan berkas Excel.
 
-Parameter QC utama yang dikonfigurasi:
+#### Parameter QC dan pengolahan
+
+Parameter utama yang digunakan pada konfigurasi `analisisS.py` adalah
+sebagai berikut.
 
 | Parameter | Nilai |
 |---|---:|
@@ -548,7 +588,11 @@ Analisis sensitivitas menggunakan tiga skenario ambang:
 | Dasar | 2 cm | 20% | 20° |
 | Longgar | 3 cm | 30% | 30° |
 
-Aturan kecocokan yang digunakan adalah selisih amplitudo memenuhi batas absolut **atau** batas relatif, serta selisih fase memenuhi batas skenario.
+Suatu konstanta harmonik dinyatakan cocok apabila selisih amplitudonya
+memenuhi batas absolut **atau** batas relatif yang ditentukan pada
+skenario, serta selisih fasenya memenuhi batas skenario yang sama.
+Dengan demikian, skenario ketat menggunakan toleransi paling kecil,
+sedangkan skenario longgar memberikan toleransi paling besar.
 
 ### 8.4 Dashboard, `dasbor2026.py`
 
