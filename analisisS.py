@@ -60,15 +60,20 @@ CUTOFF_KONSTANTA_KM = 100.0      # ekstrapolasi konstanta
 TZ_RADAR_JAM = 0
 TZ_AKTIF = TZ_RADAR_JAM
 
-# QC data radar per menit
+# QC data radar per menit (disamakan dengan t__tide.py)
 QC_AKTIF = True
 QC_JENDELA_MENIT = 31
 QC_N_SIGMA = 4.0
 QC_MIN_AMBANG_M = 0.5
 QC_RUN_DATAR_MENIT = 30
 MIN_SAMPEL_PER_JAM = 20
+INTERP_METODE = "time"
 INTERP_LIMIT_JAM = 6
 MAKS_LAG_JAM = 8
+
+# NaN yang tersisa setelah interpolasi gap pendek menjadi anomali 0.
+# Artinya setara muka air rata-rata, bukan elevasi absolut 0 m.
+NAN_JADI_NOL = True
 
 # analisis harmonik radar
 HARMONIK_SUMBER = "ttide_file"
@@ -187,8 +192,13 @@ def baca_radar(stasiun, bulan):
 
     data = raw.iloc[awal:]
     waktu = _parse_waktu(data.iloc[:, 0], bulan)
-    seri = pd.Series(pd.to_numeric(data.iloc[:, c_val], errors="coerce").values, index=waktu.values)
-    seri = seri[seri.index.notna()].dropna().sort_index()
+    seri = pd.Series(
+        pd.to_numeric(data.iloc[:, c_val], errors="coerce").values,
+        index=waktu.values
+    )
+    # Pertahankan NaN agar dihitung sebagai sampel kosong saat agregasi per jam,
+    # bukan menghapusnya sebelum proses QC.
+    seri = seri[seri.index.notna()].sort_index()
     seri = seri[~seri.index.duplicated()]
     seri.index = pd.DatetimeIndex(seri.index)
     # selalu batasi ke bulan target: beberapa sheet memuat 1 baris dari bulan berikutnya
@@ -226,14 +236,47 @@ def bersihkan_radar(seri):
     return x
 
 def radar_per_jam(seri):
-    """Rata-rata per jam (label hh:30); jam dengan sampel < MIN_SAMPEL_PER_JAM -> kosong -> interpolasi."""
+    """Rata-rata per jam pada interval [hh:00, hh+1:00), label hh:30.
+    Minimal 20 sampel per jam; interpolasi hanya untuk gap utuh <= 6 jam.
+    Algoritma disamakan dengan ke_per_jam() dan isi_gap() pada t__tide.py.
+    """
     g = seri.resample("1h", closed="left", label="left")
     h = g.mean()
     jml = g.count()
     h[jml < MIN_SAMPEL_PER_JAM] = np.nan
+
+    # Pastikan semua jam dalam rentang waktu tersedia.
+    if len(h) == 0:
+        return h, 0, 0
+    penuh = pd.date_range(h.index[0], h.index[-1], freq="1h")
+    h = h.reindex(penuh)
+
     n_kosong = int(h.isna().sum())
-    h_interp = h.interpolate(method="time", limit=INTERP_LIMIT_JAM, limit_area="inside")
-    n_interp = int(h.isna().sum() - h_interp.isna().sum())
+
+    # Interpolasi berbasis waktu, tetapi hanya untuk gap utuh <= 6 jam.
+    kosong = h.isna().values
+    terinterpolasi = h.interpolate(
+        method=INTERP_METODE,
+        limit_area="inside"
+    )
+    boleh = np.zeros(len(h), dtype=bool)
+    i = 0
+    while i < len(h):
+        if kosong[i]:
+            j = i
+            while j < len(h) and kosong[j]:
+                j += 1
+            if (j - i) <= INTERP_LIMIT_JAM:
+                boleh[i:j] = True
+            i = j
+        else:
+            i += 1
+
+    h_interp = h.copy()
+    h_interp[ boleh ] = terinterpolasi[ boleh ]
+    n_interp = int((boleh & h_interp.notna().values).sum())
+
+    # Label waktu di tengah interval jam.
     h_interp.index = h_interp.index + pd.Timedelta(minutes=30)
     return h_interp, n_kosong, n_interp
 
@@ -571,11 +614,12 @@ for stasiun, (lon, lat) in STASIUN.items():
             mentah = bersihkan_radar(mentah)
         jam, n_kosong, n_interp = radar_per_jam(mentah)
         jam.index = jam.index - pd.Timedelta(hours=TZ_AKTIF)     # ke UTC (naive)
-        jam = jam.dropna()
-        if len(jam) < 48:
+        # NaN yang tersisa dipertahankan sampai pembentukan anomali.
+        if jam.notna().sum() < 48:
             print("  Data per jam terlalu sedikit, dilewati.")
             continue
-        print(f"  Jam valid: {len(jam)} | jam kosong awal: {n_kosong} | diinterpolasi: {n_interp}")
+        print(f"  Jam total: {len(jam)} | jam valid: {int(jam.notna().sum())} | "
+              f"jam kosong awal: {n_kosong} | diinterpolasi: {n_interp}")
 
         #TAHAP 2: harmonik radar
         sumber_hr = HARMONIK_SUMBER
@@ -649,10 +693,21 @@ for stasiun, (lon, lat) in STASIUN.items():
         if gagal:
             continue
 
-        df = df.dropna()
-        for kol in [c for c in df.columns if c.endswith("_raw_m")]:
-            df[kol.replace("_raw_m", "_m")] = df[kol] - df[kol].mean()
-        df["Radar_m"] = df["Radar_raw_m"] - df["Radar_raw_m"].mean()
+        # Buang hanya waktu ketika prediksi model tidak tersedia.
+        # NaN radar tetap dipertahankan untuk diubah menjadi anomali 0.
+        kolom_model = [f"{nama}_raw_m" for nama in MODELS]
+        df = df.dropna(subset=kolom_model).copy()
+
+        # Anomali radar: NaN diisi dengan rata-rata radar sehingga anomali = 0.
+        msl_radar = df["Radar_raw_m"].mean()
+        if NAN_JADI_NOL:
+            df["Radar_raw_m"] = df["Radar_raw_m"].fillna(msl_radar)
+        df["Radar_m"] = df["Radar_raw_m"] - msl_radar
+
+        # Anomali masing-masing model dihitung dari rata-rata bulan tersebut.
+        for nama in MODELS:
+            kol = f"{nama}_raw_m"
+            df[f"{nama}_m"] = df[kol] - df[kol].mean()
 
         metrik = {}
         for nama in MODELS:
