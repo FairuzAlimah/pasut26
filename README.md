@@ -26,8 +26,7 @@ Data pengamatan muka air laut diperoleh dari sensor radar pada stasiun pasang su
 10. [Konfigurasi Path dan Data Eksternal](#10-konfigurasi-path-dan-data-eksternal)
 11. [Berkas yang Dihasilkan](#11-berkas-yang-dihasilkan)
 12. [Pemecahan Masalah](#12-pemecahan-masalah)
-13. [Catatan Reproduksibilitas dan Lisensi Data](#13-catatan-reproduksibilitas-dan-lisensi-data)
-14. [Referensi](#14-referensi)
+13. [Referensi](#13-referensi)
 ---
 
 ## 1. Gambaran Umum
@@ -678,19 +677,7 @@ Folder hasil pengolahan akan dibuat oleh program sesuai tahapan yang dijalankan.
 
 ---
 
-## 13. Catatan Reproduksibilitas dan Lisensi Data
-
-- Hasil pengolahan bergantung pada versi library, berkas model, data masukan, konfigurasi parameter, dan koordinat stasiun.
-- Catat versi Python dan library pada setiap rilis agar proses dapat direproduksi.
-- Jangan mengunggah kata sandi, token, kredensial, atau data privat.
-- Periksa ketentuan distribusi data radar dan model sebelum mengunggah data mentah atau berkas model ke repository publik.
-- Untuk model EOT20, ikuti ketentuan penggunaan dan atribusi dari sumber PANGAEA.
-- Repository publik tidak otomatis memberikan lisensi penggunaan ulang. Tambahkan berkas `LICENSE` setelah menentukan lisensi yang sesuai dan memiliki hak untuk melisensikan kode/data terkait.
-- Berkas model NetCDF dan hasil antara berukuran besar sebaiknya disimpan di penyimpanan terpisah atau Git LFS jika memang perlu dikelola melalui Git.
-
----
-
-## 14. Referensi
+## 13. Referensi
 
 1. pyTMD — https://github.com/pyTMD/pyTMD
 2. Dokumentasi pyTMD — https://pytmd.readthedocs.io/
